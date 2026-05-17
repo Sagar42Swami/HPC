@@ -1,0 +1,189 @@
+
+Merged both programs into one practical-ready file:
+
+[Combined_CUDA_Practical.cu](C:/Users/sagar/Documents/Codex/2026-05-17/files-mentioned-by-the-user-matrix/Combined_CUDA_Practical.cu)
+
+I did not overwrite your original `E:\...` files. I made a clean combined version here.
+
+**What It Contains**
+- Vector addition using CPU and GPU
+- Matrix multiplication using CPU and GPU
+- Result verification
+- GPU time, CPU time, and speedup factor
+- Menu:
+  - `1` = Vector Addition
+  - `2` = Matrix Multiplication
+  - `3` = Run Both
+
+**Important Change**
+I kept vector size as `1000000`, but changed matrix size from `1000 x 1000` to `512 x 512` because CPU matrix multiplication with `1000 x 1000` can take a long time in practical exams. If your teacher expects `1000`, change these lines:
+
+```c
+int rowsA = 512;
+int colsA = 512;
+int rowsB = 512;
+int colsB = 512;
+```
+
+to:
+
+```c
+int rowsA = 1000;
+int colsA = 1000;
+int rowsB = 1000;
+int colsB = 1000;
+```
+
+**How To Execute From Scratch**
+
+On Windows, open Command Prompt or PowerShell in the folder where the file is saved:
+
+```powershell
+cd C:\Users\sagar\Documents\Codex\2026-05-17\files-mentioned-by-the-user-matrix
+```
+
+Compile:
+
+```powershell
+nvcc Combined_CUDA_Practical.cu -o Combined_CUDA_Practical.exe
+```
+
+Run:
+
+```powershell
+.\Combined_CUDA_Practical.exe
+```
+
+On Linux:
+
+```bash
+nvcc Combined_CUDA_Practical.cu -o Combined_CUDA_Practical
+./Combined_CUDA_Practical
+```
+
+I checked this system, and `nvcc` is not available in PATH here, so I could not compile locally. On your lab machine with CUDA installed, the above commands are the correct ones.
+
+**Line-by-Line Explanation, Exam Style**
+
+Lines `1-5`: Include required libraries.  
+`stdio.h` for `printf`, `stdlib.h` for `malloc/free`, `time.h` for timing/random seed, `cuda_runtime.h` for CUDA functions, `stdbool.h` for `bool`.
+
+Lines `7-15`: `CUDA_CHECK` macro checks CUDA API errors like `cudaMalloc`, `cudaMemcpy`, and kernel launch errors.
+
+Lines `17-23`: GPU kernel for vector addition. Each GPU thread calculates one index `tid` and performs:
+
+```c
+c[tid] = a[tid] + b[tid];
+```
+
+Lines `25-29`: CPU version of vector addition using a normal `for` loop.
+
+Lines `31-38`: Compares GPU and CPU vector outputs.
+
+Lines `40-54`: GPU kernel for matrix multiplication. Each thread computes one element of result matrix `C`.
+
+Lines `42-43`: Calculate row and column handled by current GPU thread.
+
+Lines `48-50`: Dot product logic:
+
+```c
+C[row][col] = sum of A[row][k] * B[k][col]
+```
+
+Lines `56-69`: CPU version of matrix multiplication using three nested loops.
+
+Lines `71-78`: Compares GPU and CPU matrix outputs.
+
+Lines `80-140`: Complete vector addition practical:
+allocates CPU memory, fills random values, allocates GPU memory, copies data to GPU, launches kernel, copies result back, runs CPU version, verifies result, prints time and speedup, frees memory.
+
+Lines `142-216`: Complete matrix multiplication practical:
+sets matrix sizes, checks valid multiplication condition, allocates memory, fills random values, copies matrices to GPU, launches CUDA kernel, copies result back, runs CPU multiplication, verifies result, prints timing and speedup, frees memory.
+
+Lines `218-246`: Main menu. Takes user choice and calls vector addition, matrix multiplication, or both.
+
+**What To Say In Viva**
+
+This program demonstrates parallel computation using CUDA. In CPU execution, operations run sequentially using loops. In GPU execution, many threads run in parallel. For vector addition, each thread computes one vector element. For matrix multiplication, each thread computes one output matrix element. Finally, CPU and GPU results are compared to verify correctness, and speedup is calculated as:
+
+```c
+speedup = CPU time / GPU time
+```
+
+That error means **CUDA compiler (`nvcc`) is not installed or not added to PATH**.
+
+Do this first:
+
+**1. Check if CUDA is installed**
+
+Open Command Prompt and run:
+
+```cmd
+where nvcc
+```
+
+If it says not found, try checking this folder manually:
+
+```cmd
+dir "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA"
+```
+
+If you see a folder like `v12.4`, `v12.5`, etc., CUDA is installed but PATH is missing.
+
+**2. Temporarily add CUDA to PATH**
+
+Replace `v12.5` with your actual version:
+
+```cmd
+set PATH=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.5\bin;%PATH%
+```
+
+Then test:
+
+```cmd
+nvcc --version
+```
+
+Now compile:
+
+```cmd
+cd C:\Users\sagar\Documents\Codex\2026-05-17\files-mentioned-by-the-user-matrix
+nvcc Combined_CUDA_Practical.cu -o Combined_CUDA_Practical.exe
+Combined_CUDA_Practical.exe
+```
+
+**3. If CUDA folder does not exist**
+
+Then CUDA Toolkit is not installed. You need to install:
+
+1. NVIDIA GPU driver
+2. CUDA Toolkit
+3. Visual Studio with C++ build tools, if on Windows
+
+For tomorrow’s practical, fastest option: use your college lab PC, because those machines usually already have CUDA configured.
+
+**Common Exam-Friendly Answer**
+
+If examiner asks why `nvcc` error comes:
+
+> `nvcc` is the NVIDIA CUDA compiler. This error occurs when CUDA Toolkit is not installed or its `bin` directory is not added to the system PATH environment variable.
+
+**Permanent PATH Fix**
+
+Add this to Windows Environment Variables → Path:
+
+```text
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.5\bin
+```
+
+Also add:
+
+```text
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.5\libnvvp
+```
+
+Then reopen Command Prompt and run:
+
+```cmd
+nvcc --version
+```
